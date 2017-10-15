@@ -1,0 +1,25 @@
+		String priceColumnName,int[] offSet) {
+		URLConnection conn;
+		JSONArray docs = null;
+		try {
+			
+			String serverIP="localhost",serverPort="8983";
+			URL url = new URL("http://"+serverIP+":"+serverPort+"/solr/"+coreName+"/select?q=sig_id_t:*&fl=id,Item_ID_t,sig_id_t,"+priceColumnName+"&group=true&"
+					+ "group.field=sig_id_t&group.sort=final_price_d%20asc&group.limit=1&rows="+offSet[0]+"&start="+offSet[1]+"&wt=json");
+			conn = url.openConnection();
+			conn.setDoOutput(true);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			String responseStream = reader.readLine().toString();
+			responseStream = responseStream.replaceAll("responseHeader.*?docs", "docs");
+			responseStream = responseStream.replaceAll("]}}.*?\\[", ",");
+			responseStream = responseStream.replaceAll("}\\]}}}", "");
+			responseStream = responseStream.replaceAll("\"", "\\\"");
+			
+			JSONObject output = new JSONObject(responseStream);
+		    docs = output.getJSONArray("docs");
+	     
+		} catch (Exception e) {
+			e.printStackTrace();
+		}	
+		return docs;
+
